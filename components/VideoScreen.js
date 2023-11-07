@@ -4,7 +4,6 @@ import {
     Button,
     TouchableOpacity,
 } from 'react-native'
-import Video from 'react-native-video';
 
 import { Card, Title, Paragraph, ActivityIndicator } from 'react-native-paper';
 import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
@@ -140,7 +139,7 @@ function VideoScreen({navigation}) {
         <SafeAreaView style={Styles.paren_view}>
 
             <View style={Styles.app_view}>
-                <Text style={Styles.app_title}>Jay Shivray !</Text>
+                <Text style={Styles.app_title}>Jay Bhavani !</Text>
             </View>
 
             <View>
