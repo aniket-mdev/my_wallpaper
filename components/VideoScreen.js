@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {
     View, Text, StyleSheet, FlatList, ScrollView, SafeAreaView,
     Button,
+    Dimensions,
     TouchableOpacity,
 } from 'react-native'
 
@@ -183,6 +184,7 @@ function VideoScreen({navigation}) {
 
     )
 }
+const { width, height } = Dimensions.get('window');
 
 const Styles = StyleSheet.create({
     paren_view: {
@@ -215,7 +217,8 @@ const Styles = StyleSheet.create({
     },
     card_cover: {
         width: 120,
-        height: 120
+        height: 120,
+       
     },
     smp_text: {
         color: 'white',
@@ -236,15 +239,21 @@ const Styles = StyleSheet.create({
     list: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        marginStart:15,
+        marginEnd:15
     },
     item: {
         // margin:15,
-        marginStart: 20,
-        marginLeft: 20
+        marginStart: 5,
+        marginLeft: 5,
     },
     all_image_card_cover: {
-        width: 150,
-        height: 150
+        //width: 150,
+        //height: 150,
+        
+        width: width * 0.39 ,
+        height: height/6,
+
     }
 })
 
