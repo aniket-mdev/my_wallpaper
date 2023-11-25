@@ -11,6 +11,7 @@ import {
   Dimensions,
   PermissionsAndroid,
   TouchableHighlight,
+  ToastAndroid
 } from 'react-native';
 import {Card, Title, Paragraph, ActivityIndicator} from 'react-native-paper';
 import Share from 'react-native-share';
@@ -20,101 +21,75 @@ import RNFetchBlob from 'rn-fetch-blob';
 function FullImageView() {
   const route = useRoute();
   const path = route.params?.path;
+  const fileName = route.params.fileName;
   const ref = useRef();
-  const [displa_app_txt, setDisplayAppText] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onLike = item => {
-    console.log('on Liked Cliked');
-  };
-  const REMOTE_IMAGE_PATH =
-  'https://homepages.cae.wisc.edu/~ece533/images/cat.png'
-  const checkPermission = async () => {
-    
-    // Function to check the platform
-    // If iOS then start downloading
-    // If Android then ask for permission
-
-    if (Platform.OS === 'ios') {
-      downloadImage();
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message:
-              'App needs access to your storage to download Photos',
-          }
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          // Once user grant the permission start downloading
-          console.log('Storage Permission Granted.');
-          downloadImage();
-        } else {
-          // If permission denied then show alert
-          alert('Storage Permission Not Granted');
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            {
-              title: 'Storage Permission Required',
-              message:
-                'App needs access to your storage to download Photos',
-            }
-          );
-        }
-      } catch (err) {
-        // To handle permission related exception
-        console.warn(err);
-      }
-    }
-  };
-
-  const downloadImage = () => {
-    let date = new Date();
-    // Image URL which we want to download
-    let image_URL = REMOTE_IMAGE_PATH;    
-    // Getting the extention of the file
-    let ext = getExtention(image_URL);
-    ext = '.' + ext[0];
-    // Get config and fs from RNFetchBlob
-    // config: To pass the downloading related options
-    // fs: Directory path where we want our image to download
-    const { config, fs } = RNFetchBlob;
-    let PictureDir = fs.dirs.PictureDir;
-    let options = {
+  const actualDownload = (file_path) => {
+    setLoading(true);
+    let dirs = RNFetchBlob.fs.dirs;
+    RNFetchBlob.config({
+      // add this option that makes response data to be stored as a file,
+      // this is much more performant.
+      path: dirs.DownloadDir + '/' + fileName,
       fileCache: true,
-      addAndroidDownloads: {
-        // Related to the Android only
-        useDownloadManager: true,
-        notification: true,
-        path:
-          PictureDir +
-          '/image_' + 
-          Math.floor(date.getTime() + date.getSeconds() / 2) +
-          ext,
-        description: 'Image',
-      },
-    };
-    config(options)
-      .fetch('GET', image_URL)
+    })
+      .fetch(
+        'GET',
+        file_path,
+        {},
+      )
       .then(res => {
-        // Showing alert after successful downloading
-        console.log('res -> ', JSON.stringify(res));
-        alert('Image Downloaded Successfully.');
+        setLoading(false);
+        ToastAndroid.showWithGravity(
+          'Your file has been downloaded to downloads folder!',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM,
+        );
       });
   };
 
-  const shareImage = async () => {
+  const downloadFile = async (file_path) => {
     try {
-      setDisplayAppText(true);
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to memory to download the file ',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        actualDownload(file_path);
+      } else {
+        Alert.alert(
+          'Permission Denied!',
+          'You need to give storage permission to download the file',
+        );
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert(
+        'Something Went Wrong!',
+        '',
+      );
+    }
+  };
+  const onLike = item => {
+    console.log('on Liked Cliked');
+  };
+
+
+  const shareImage = async () => {
+    setLoading(true)
+    try {
       const uri = await captureRef(ref, {
         format: 'png',
         quality: 0.7,
       });
+      setLoading(false)
       await Share.open({url: uri});
     } catch (e) {
       console.log(e);
-      setDisplayAppText(false)
     }
   };
 
@@ -125,9 +100,6 @@ function FullImageView() {
           <Card style={Styles.container}>
             <Card.Cover style={Styles.card_cover} source={{uri: path}} />
           </Card>
-          {displa_app_txt ? (
-            <Text style={Styles.app_title}>Jay Bhavani !</Text>
-          ) : null}
         </ViewShot>
         <View style={Styles.menu_view}>
           <TouchableHighlight onPress={() => shareImage()}>
@@ -144,12 +116,13 @@ function FullImageView() {
             />
           </TouchableHighlight>
 
-          <TouchableHighlight onPress={checkPermission}>
+          <TouchableHighlight onPress={() => downloadFile(path)}>
             <Image
               style={Styles.icons}
               source={require('../assets/icons/arrow.png')}
             />
           </TouchableHighlight>
+          {loading ? <ActivityIndicator size="small" color="#0000ff" /> : null}
         </View>
       </SafeAreaView>
     );

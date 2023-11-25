@@ -21,7 +21,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './components/HomeScreen';
 import VideoScreen from './components/VideoScreen';
 import FullImageView from './components/FullImageView';
-
+import Permissions from './components/Permissions';
 const Stack = createNativeStackNavigator();
 
 
@@ -40,6 +40,9 @@ function App() {
           headerTintColor:'white'
         }}
         />
+
+        <Stack.Screen name="Permission" component={Permissions} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

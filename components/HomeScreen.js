@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 const Tab = createBottomTabNavigator();
 import { Image } from "react-native"
 import VideoScreen from './VideoScreen';
+import Permissions from './Permissions';
 
 function Setting(){
     return (
@@ -54,6 +55,9 @@ function HomeScreen() {
         <Tab.Screen
         name='Setting' component={Setting}
         options={{headerShown:true}}
+        />
+        <Tab.Screen
+        name='Permission' component={Permissions}
         />
        </Tab.Navigator>
     );
